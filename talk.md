@@ -1,5 +1,6 @@
 # Coppersmith
 ## Features as functions
+### A Scala library for feature engineering
 
 ---
 
@@ -14,7 +15,7 @@
 ---
 
 
-# A typical Big Data Pipeline
+# A typical big data Pipeline
 
 ![big data pipeline](flow-small.png)
 
@@ -113,6 +114,8 @@ We can:
 User guide at [https://github.com/CommBank/coppersmith/blob/master/USERGUIDE.markdown](https://github.com/CommBank/coppersmith/blob/master/USERGUIDE.markdown)
 ---
 
+## Feature code
+
 ```scala
 package commbank.coppersmith.examples.userguide
 
@@ -143,6 +146,8 @@ object MovieReleaseFeatures extends FeatureSetWithTime[Movie] {
 }
 ```  
 ---
+
+## Plumbing code
 
 ```scala
 package commbank.coppersmith.examples.userguide
@@ -178,6 +183,8 @@ object MovieFeaturesJob extends SimpleFeatureJob {
 
 ---
 
+## Aggregations
+
 ```scala
 package commbank.coppersmith.examples.userguide
 
@@ -203,6 +210,8 @@ object RatingFeatures extends AggregationFeatureSet[Rating] {
 ```
 
 ---
+
+## Joins
 
 ```scala
 package commbank.coppersmith.examples.userguide
@@ -253,7 +262,13 @@ object JoinFeatures extends AggregationFeatureSet[(Movie, Rating)] {
 
 ## Are you developing features at scale?
 
-Try coppersmith!
-We would love to hear your experiences!
+- Try coppersmith!
+- We would love to hear your experiences!
+- PRs/functionality requests/bug reports welcome!
 
-PRs/functionality requests/bug reports welcome!!!
+### [https://github.com/CommBank/coppersmith](https://github.com/CommBank/coppersmith)
+
+---
+
+Questions?
+==========

@@ -72,6 +72,7 @@ code {
 		<textarea id="source">
 # Coppersmith
 ## Features as functions
+### A Scala library for feature engineering
 
 ---
 
@@ -139,7 +140,8 @@ code {
       - Doesn't scale to large teams
       - Social solutions do exist but have overhead
   - Awkward to test (less so than Hive though)    
-  - Difficult to port jobs to another platform like Spark. APIs are similar but still too different
+  - Difficult to port jobs to another platform like Spark
+    - APIs are similar but still too different
 - Metadata (What features do we have?)
   - Can discover some things (feature names, types) but high-level documentation exists separately from code
     - Social solutions exist but have overhead
@@ -184,6 +186,8 @@ We can:
 User guide at [https://github.com/CommBank/coppersmith/blob/master/USERGUIDE.markdown](https://github.com/CommBank/coppersmith/blob/master/USERGUIDE.markdown)
 ---
 
+## Feature code
+
 ```scala
 package commbank.coppersmith.examples.userguide
 
@@ -213,8 +217,45 @@ object MovieReleaseFeatures extends FeatureSetWithTime[Movie] {
   val features = List(comedyMovieReleaseYears, recentFantasyReleaseYears)
 }
 ```  
+---
+
+## Plumbing code
+
+```scala
+package commbank.coppersmith.examples.userguide
+
+import org.apache.hadoop.fs.Path
+
+import com.twitter.scalding.Config
+
+import org.joda.time.DateTime
+
+import commbank.coppersmith.api._, scalding._, Coppersmith._
+import commbank.coppersmith.examples.thrift.Movie
+
+case class MovieFeaturesConfig(conf: Config) extends FeatureJobConfig[Movie] {
+  val partitions     = ScaldingDataSource.Partitions.unpartitioned
+  val movies         = HiveTextSource[Movie, Nothing](new Path("data/movies"), partitions)
+
+  val featureSource  = From[Movie]().bind(from(movies))
+
+  val featureContext = ExplicitGenerationTime(new DateTime(2015, 1, 1, 0, 0))
+
+  val dbPrefix       = conf.getArgs("db-prefix")
+  val dbRoot         = new Path(conf.getArgs("db-root"))
+  val tableName      = conf.getArgs("table-name")
+
+  val featureSink    = EavtSink.configure(dbPrefix, dbRoot, tableName)
+}
+
+object MovieFeaturesJob extends SimpleFeatureJob {
+  def job = generate(MovieFeaturesConfig(_), MovieFeatures)
+}
+```
 
 ---
+
+## Aggregations
 
 ```scala
 package commbank.coppersmith.examples.userguide
@@ -233,7 +274,6 @@ object RatingFeatures extends AggregationFeatureSet[Rating] {
     .asFeature(Continuous, "MOVIE_AVG_RATING",
                "Average movie rating")
 
-
   val goodRatingCount = select(count(_.rating > 3))
     .asFeature(Discrete, "POS_RATING_COUNT", "Number of positive ratings")
 
@@ -242,6 +282,8 @@ object RatingFeatures extends AggregationFeatureSet[Rating] {
 ```
 
 ---
+
+## Joins
 
 ```scala
 package commbank.coppersmith.examples.userguide
@@ -292,13 +334,19 @@ object JoinFeatures extends AggregationFeatureSet[(Movie, Rating)] {
 
 ## Are you developing features at scale?
 
-Try coppersmith!
-We would love to hear your experiences!
+- Try coppersmith!
+- We would love to hear your experiences!
+- PRs/functionality requests/bug reports welcome!
 
-PRs welcome!!!
+### [https://github.com/CommBank/coppersmith](https://github.com/CommBank/coppersmith)
+
+---
+
+Questions?
+==========
 
 		</textarea>
-		<script src="http://gnab.github.io/remark/downloads/remark-latest.min.js"></script>
+		<script src="remark-latest.min.js"></script>
 		<script>
 			var slideshow = remark.create();
 		</script>
