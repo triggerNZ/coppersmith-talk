@@ -67,7 +67,8 @@
       - Doesn't scale to large teams
       - Social solutions do exist but have overhead
   - Awkward to test (less so than Hive though)    
-  - Difficult to port jobs to another platform like Spark. APIs are similar but still too different
+  - Difficult to port jobs to another platform like Spark
+    - APIs are similar but still too different
 - Metadata (What features do we have?)
   - Can discover some things (feature names, types) but high-level documentation exists separately from code
     - Social solutions exist but have overhead
@@ -141,6 +142,39 @@ object MovieReleaseFeatures extends FeatureSetWithTime[Movie] {
   val features = List(comedyMovieReleaseYears, recentFantasyReleaseYears)
 }
 ```  
+---
+
+```scala
+package commbank.coppersmith.examples.userguide
+
+import org.apache.hadoop.fs.Path
+
+import com.twitter.scalding.Config
+
+import org.joda.time.DateTime
+
+import commbank.coppersmith.api._, scalding._, Coppersmith._
+import commbank.coppersmith.examples.thrift.Movie
+
+case class MovieFeaturesConfig(conf: Config) extends FeatureJobConfig[Movie] {
+  val partitions     = ScaldingDataSource.Partitions.unpartitioned
+  val movies         = HiveTextSource[Movie, Nothing](new Path("data/movies"), partitions)
+
+  val featureSource  = From[Movie]().bind(from(movies))
+
+  val featureContext = ExplicitGenerationTime(new DateTime(2015, 1, 1, 0, 0))
+
+  val dbPrefix       = conf.getArgs("db-prefix")
+  val dbRoot         = new Path(conf.getArgs("db-root"))
+  val tableName      = conf.getArgs("table-name")
+
+  val featureSink    = EavtSink.configure(dbPrefix, dbRoot, tableName)
+}
+
+object MovieFeaturesJob extends SimpleFeatureJob {
+  def job = generate(MovieFeaturesConfig(_), MovieFeatures)
+}
+```
 
 ---
 
