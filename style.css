@@ -1,3 +1,18 @@
 .remark-code {
       font-size: 16px;
 }
+
+thead tr {
+    font-size: 18px;
+}
+
+tbody tr {
+  font-family: monospace;
+  font-size: 18px;
+}
+
+table {
+  border-style: solid;
+  border-width: 1px;
+  border-color: black;
+}

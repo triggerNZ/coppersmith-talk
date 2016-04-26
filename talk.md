@@ -48,31 +48,41 @@
 ---
 
 # Feature implementation
+## Previous state
 
-- We saw:
-  - Scalding jobs
-  - Hive queries embedded in Scala shells
+- Hive
+  - SQL on Hadoop
+  - Embedded in scala shell
+- Scalding
+  - Scala library to treat data flows as collection-like operations
 
 ---
 
-# Problems
+# Problems - Hive
 
-- Hive
-  - Queries are giant strings
-    - No syntax or type checking
-    - Reusability is via string manipulation and is fragile and error-prone
-    - Awkward to test
-- Scalding
-  - Framework is powerful, but general
-    - Many ways of doing the same thing. All of them are used
-      - Doesn't scale to large teams
-      - Social solutions do exist but have overhead
-  - Awkward to test (less so than Hive though)    
-  - Difficult to port jobs to another platform like Spark
-    - APIs are similar but still too different
-- Metadata (What features do we have?)
-  - Can discover some things (feature names, types) but high-level documentation exists separately from code
-    - Social solutions exist but have overhead
+- Queries are giant strings
+- No syntax or type checking
+- Reusability is via string manipulation and is fragile and error-prone
+- Awkward to test
+
+---
+
+# Problems - Scalding    
+- Framework is powerful, but general
+  - Many ways of doing the same thing. All of them are used
+    - Doesn't scale to large teams
+    - Social solutions do exist but have overhead
+- Awkward to test (less so than Hive though)    
+- Difficult to port jobs to another platform like Spark
+  - APIs are similar but still too different
+
+---
+
+# Problems - Metadata
+- What features do we have
+- Can discover some things (feature names, types)
+- BUT high-level documentation exists separately from code
+- Social solutions exist but have overhead
 
 ---
 
@@ -133,18 +143,58 @@ object MovieReleaseFeatures extends FeatureSetWithTime[Movie] {
 
   val comedyMovieReleaseYears = select(_.releaseYear)
     .where(_.isComedy)
-    .asFeature(Discrete, "COMEDY_MOVIE_RELEASE_YEAR",
+    .asFeature(Discrete, "COMEDY_MOVIE_YEAR",
                "Release year for comedy movies")
 
   val recentFantasyReleaseYears = select(_.releaseYear)
     .where   (_.isFantasy)
     .andWhere(_.releaseYear.exists(_ >= 1990))
-    .asFeature(Discrete, "RECENT_FANTASY_MOVIE_RELEASE_YEAR",
+    .asFeature(Discrete, "RECENT_FANTASY_MOVIE_YEAR",
                "Release year for fantasy movies released in or after 1990")
 
   val features = List(comedyMovieReleaseYears, recentFantasyReleaseYears)
 }
 ```  
+---
+
+## Input
+
+| Id | Name               | Genre                    | Release Year |
+|-------------------------|--------------------------|:------------:|
+| 1  | Blade Runner       | scifi                    |         1982 |
+| 2  | Mary &  Max        | animated,comedy,drama    |         2009 |
+| 3  | Death at a Funeral | comedy                   |         2007 |
+| 4  | Ghostbusters       | comedy,adventure,fantasy |         1984 |
+| 5  | Harry Potter       | adventure,family,fantasy |         2001 |
+|... | ...                | ...                      | ...          |
+
+## Output
+
+| Entity | Attribute                 | Value | Time                |
+|--------|---------------------------|-------|---------------------|
+| 2      | COMEDY_MOVIE_YEAR         | 2009  | 26-04-2016 16:55:28 |
+| 3      | COMEDY_MOVIE_YEAR         | 2007  | 26-04-2016 16:55:28 |
+| 5      | RECENT_FANTASY_MOVIE_YEAR | 2001  | 26-04-2016 16:55:28 |
+| ...    | ...                       | ...   | ...                 |
+
+---
+
+# Metadata
+
+```
+[ {
+  source: "commbank.coppersmith.examples.thrift.Movie",
+  namespace: "userguide.examples",
+  name:  "COMEDY_MOVIE_RELEASE_YEAR",
+  description: "Release year for comedy movies",
+  featureType: "discrete",
+  valueType: "integral"
+}
+
+...
+]
+```
+
 ---
 
 ## Plumbing code
