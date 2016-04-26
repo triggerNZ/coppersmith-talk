@@ -8,8 +8,8 @@
 - Tin Pavlinic
 - github/twitter: @triggerNZ
 - Consultant at Simple Machines
-- Presently consulting on a big-data initiative at Commonwealth Bank
-- Opinions presented are my own and do not reflect those of my employer or client.
+- Presently consulting on a big data initiative at a large financial institution
+- Opinions presented are my own and not of my employer or client
 
 ---
 
@@ -19,7 +19,7 @@
 ![big data pipeline](flow-small.png)
 
 - Hundreds of load jobs
-- Hundreds of feature jobs
+- Dozens of feature jobs
   - Thousands of features
 - Many development teams
 
@@ -30,7 +30,7 @@
 - Analytical data about an entity (e.g. customer)
 - Computed periodically
 - Represent a distinct attribute of the entity (e.g. balance, age, suburb)
-- Have metadata about the feature - types, names, human descriptions, value ranges, etc
+- Have associated metadata - types, names, descriptions, value ranges, etc
 
 ---
 
@@ -50,14 +50,14 @@
 
 - We saw:
   - Scalding jobs
-  - Hive queries embedded in Scala shells.
+  - Hive queries embedded in Scala shells
 
 ---
 
 # Problems
 
 - Hive
-  - Queries are giant strings.
+  - Queries are giant strings
     - No syntax or type checking
     - Reusability is via string manipulation and is fragile and error-prone
     - Awkward to test
@@ -69,7 +69,7 @@
   - Awkward to test (less so than Hive though)    
   - Difficult to port jobs to another platform like Spark. APIs are similar but still too different
 - Metadata (What features do we have?)
-  - Can discover some things (feature names, types) but high-level documentation exists separately from code.
+  - Can discover some things (feature names, types) but high-level documentation exists separately from code
     - Social solutions exist but have overhead
 
 ---
@@ -83,9 +83,9 @@ We can:
 - Express most features as plain Scala Functions
 - Attach metadata to feature functions, and have the compiler enforce its presence
   - Introspect features and publish metadata
-- Cleanly separate "plumbing" code (regarding HDFS manipulation, file formats, etc) from logic code - what features actually are.
+- Cleanly separate "plumbing" code (regarding HDFS manipulation, file formats, etc) from logic code - what features actually are
 - Express most features with a small set of code patterns and we do not need the full power of a big-data Framework (Scalding, Spark)
-- Abstract away the framework, and have the ability to port between frameworks without changing the feature code.
+- Abstract away the framework, and have the ability to port between frameworks without changing the feature code
 
 ---
 
@@ -161,7 +161,6 @@ object RatingFeatures extends AggregationFeatureSet[Rating] {
     .asFeature(Continuous, "MOVIE_AVG_RATING",
                "Average movie rating")
 
-
   val goodRatingCount = select(count(_.rating > 3))
     .asFeature(Discrete, "POS_RATING_COUNT", "Number of positive ratings")
 
@@ -204,7 +203,7 @@ object JoinFeatures extends AggregationFeatureSet[(Movie, Rating)] {
 
 - Used internally in production
 - Open sourced a fortnight ago
-- We are working closely with internal Feature Engineering teams to help adoption and address issues they are finding.
+- We are working closely with internal Feature Engineering teams to help adoption and address issues they are finding
 
 ---
 
@@ -223,4 +222,4 @@ object JoinFeatures extends AggregationFeatureSet[(Movie, Rating)] {
 Try coppersmith!
 We would love to hear your experiences!
 
-PRs welcome!!!
+PRs/functionality requests/bug reports welcome!!!
