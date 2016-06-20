@@ -4,13 +4,12 @@
 
 ---
 
-# Who am I
+# Who are we
 
 - Tin Pavlinic
-- github/twitter: @triggerNZ
-- Consultant at Simple Machines
-- Presently consulting on a big data initiative at a large financial institution
-- Opinions presented are my own and not of my employer or client
+- Kristian Domagala
+- github/twitter: @triggerNZ, @dkristian
+- Commonwealth Bank / Simple Machines
 
 ---
 
@@ -294,8 +293,8 @@ object JoinFeatures extends AggregationFeatureSet[(Movie, Rating)] {
 
 # Current state
 
-- Used internally in production
-- Open sourced a fortnight ago
+- Used internally in production at CBA
+- Open sourced 2 months ago
 - We are working closely with internal Feature Engineering teams to help adoption and address issues they are finding
 
 ---
