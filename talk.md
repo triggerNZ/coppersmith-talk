@@ -207,22 +207,21 @@ import com.twitter.scalding.Config
 
 import org.joda.time.DateTime
 
-import commbank.coppersmith.api._, scalding._, Coppersmith._
+import commbank.coppersmith.api._, scalding._, Coppersmith._. EavtText.{EavtEnc, eavtByDay}
 import commbank.coppersmith.examples.thrift.Movie
 
 case class MovieFeaturesConfig(conf: Config) extends FeatureJobConfig[Movie] {
-  val partitions     = ScaldingDataSource.Partitions.unpartitioned
-  val movies         = HiveTextSource[Movie, Nothing](new Path("data/movies"), partitions)
+  val partitions    = Partitions.unpartitioned
+  val movies        = HiveTextSource[Movie, Nothing](new Path("data/movies"), partitions)
+  val featureSource = MovieReleaseFeatures.source.bind(from(movies))
 
-  val featureSource  = From[Movie]().bind(from(movies))
+  val batchDate      = conf.getArgs("batch-date")
+  val featureContext = ExplicitGenerationTime(new DateTime(batchDate))
 
-  val featureContext = ExplicitGenerationTime(new DateTime(2015, 1, 1, 0, 0))
-
-  val dbPrefix       = conf.getArgs("db-prefix")
-  val dbRoot         = new Path(conf.getArgs("db-root"))
-  val tableName      = conf.getArgs("table-name")
-
-  val featureSink    = EavtSink.configure(dbPrefix, dbRoot, tableName)
+  val dbName      = conf.getArgs("db-name")
+  val dbPath      = new Path(conf.getArgs("db-path"))
+  val tableName   = conf.getArgs("table-name")
+  val featureSink = HiveTextSink[Eavt].configure(dbName, dbPath, tableName, eavtByDay)
 }
 
 object MovieFeaturesJob extends SimpleFeatureJob {
@@ -275,8 +274,8 @@ object JoinFeatures extends AggregationFeatureSet[(Movie, Rating)] {
   def entity(s: (Movie, Rating)) = s._1.id
 
   val source = Join[Movie].to[Rating].on(
-    movie   => movie.id,
-    rating  => rating.movieId
+    movie  => movie.id,
+    rating => rating.movieId
   )
   val select = source.featureSetBuilder(namespace, entity)
 
