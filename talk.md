@@ -300,7 +300,7 @@ object JoinFeatures extends AggregationFeatureSet[(Movie, Rating)] {
 
 # The future
 
-- 1.0 released in the next few months
+- Expand functionality and fix issues
 - More documentation and community engagement
 - Spark
 
